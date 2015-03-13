@@ -16,7 +16,12 @@ proguardOptions in Android ++= Seq("-dontobfuscate", "-dontoptimize", "-keepattr
   , "-dontwarn scala.collection.**" // required from Scala 2.11.4
 )
 
-libraryDependencies += "org.scaloid" %% "scaloid" % "3.6.1-10" withSources() withJavadoc()
+libraryDependencies ++= Seq(
+  "org.scaloid" %% "scaloid" % "3.6.1-10" withSources() withJavadoc(),
+  aar("eu.chainfire" % "libsuperuser" % "1.0.0.201503122108")
+)
+
+resolvers += "bintray-chainfire-maven" at "http://dl.bintray.com/chainfire/maven"
 
 scalacOptions in Compile += "-feature"
 
