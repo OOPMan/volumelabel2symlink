@@ -3,12 +3,16 @@
       package="com.github.oopman"
       android:versionCode="1"
       android:versionName="0.1">
+    <uses-sdk android:minSdkVersion="16"/>
 
-    <!--uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /-->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-feature android:name="android.hardware.usb.host"/>
 
-    <application android:label="@string/app_name" >
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+
+    <application android:name="eu.chainfire.libsuperuser.Application"
+                  android:label="@string/app_name">
         <activity android:name="VolumeLabel2Symlink"
                   android:label="@string/app_name">
             <intent-filter>
@@ -16,12 +20,36 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver android:name=".BootCompleteReceiver"
+                android:enabled="true"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.HOME" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".MediaActivityReceiver"
+                android:enabled="true"
+                android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_MOUNTED"/>
+                <data android:scheme="file"/>
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_REMOVED"/>
+                <data android:scheme="file"/>
+            </intent-filter>
+        </receiver>
+
+        <service android:name=".MediaActivityIntentService"
+                 android:enabled="true"
+                 android:exported="true">
+
+        </service>
     </application>
 
-    <!--receiver
-            android:name="com.github.oopman.PerformCheckReceiver"
-            android:exported="false">
-    </receiver-->
-
-    <uses-sdk android:minSdkVersion="16"/>
 </manifest>
