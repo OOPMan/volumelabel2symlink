@@ -33,7 +33,7 @@ class VolumeLabel2Symlink extends SActivity {
           alert("Results",
             (for (resultLine <- Shell.SU.run("blkid").asScala) yield (resultLine, resultLine) match {
               case (blockDevicePattern(device), labelledBlockDevicePattern(label)) =>
-                Shell.SU.run(s"ln -s /mnt/usb/$device /mnt/usb/$label")
+                Shell.SU.run(s"ln -s /mnt/usb/$device /mnt/usb/\"$label\"")
                 s"Linked /mnt/usb/$device to /mnt/usb/$label"
               case _ => ""
             }) filter {
