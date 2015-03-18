@@ -18,7 +18,8 @@ proguardOptions in Android ++= Seq("-dontobfuscate", "-dontoptimize", "-keepattr
 
 libraryDependencies ++= Seq(
   "org.scaloid" %% "scaloid" % "3.6.1-10" withSources() withJavadoc(),
-  aar("eu.chainfire" % "libsuperuser" % "1.0.0.201503122108")
+  aar("eu.chainfire" % "libsuperuser" % "1.0.0.201503122108"),
+  aar("net.rdrei.android.dirchooser" % "library" % "2.1")
 )
 
 resolvers += "bintray-chainfire-maven" at "http://dl.bintray.com/chainfire/maven"
