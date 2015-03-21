@@ -1,15 +1,23 @@
 package com.github.oopman
 
+import java.util
+
+import android.app.ListActivity
 import android.content.Intent
 import android.graphics.Color
 import android.os.AsyncTask
 import android.view.View
+import android.widget._
 import eu.chainfire.libsuperuser.Shell
 import org.scaloid.common._
 import scala.collection.JavaConverters._
 import net.rdrei.android.dirchooser.DirectoryChooserActivity
 
+import android.widget.AbsListView.{CHOICE_MODE_SINGLE, CHOICE_MODE_MULTIPLE}
+
 import scala.concurrent.{ExecutionContext, Future}
+
+import scala.collection.mutable.ArrayBuffer
 
 class VolumeLabel2Symlink extends SActivity {
   implicit val exec = ExecutionContext.fromExecutor(
@@ -24,18 +32,20 @@ class VolumeLabel2Symlink extends SActivity {
   val REQUEST_CODE_LINK_LOCATION = 1
 
   var linkLocation: STextView = null
-  var scanLocations: SListView = null
-
+  val scanLocations: util.ArrayList[String] = new util.ArrayList()
+  var scanLocationsAdapter: ArrayAdapter[String] = null
 
   onCreate {
     val prefs = getPreferences(0)
 
     contentView = new SVerticalLayout {
       style {
-        case t: STextView => t textSize 10.dip
+        case t: STextView => t.textSize(20.dip).<<.marginBottom(10.dip).>>
+        case b: SButton => b.<<.marginBottom(10.dip).>>
       }
 
-      STextView("VolumeLabel2Symlink").textSize(20.dip).marginBottom(20.dip)
+      STextView("VolumeLabel2Symlink")
+
       SButton("Set Link Location", (view: View) => {
         startActivityForResult(
           SIntent[DirectoryChooserActivity]
@@ -44,6 +54,7 @@ class VolumeLabel2Symlink extends SActivity {
           REQUEST_CODE_LINK_LOCATION)
       })
       linkLocation = STextView("Link location: " + prefs.getString("linkLocation", defaultLinkLocation))
+
       SButton("Add Scan Location", (view: View) => {
         startActivityForResult(
           SIntent[DirectoryChooserActivity]
@@ -51,10 +62,20 @@ class VolumeLabel2Symlink extends SActivity {
             .putExtra(DirectoryChooserActivity.EXTRA_NEW_DIR_NAME, "links"),
           REQUEST_CODE_SCAN_LOCATION)
       })
-      scanLocations = SListView().adapter(SArrayAdapter(prefs.getStringSet("scanLocations", defaultScanLocations)))
+      scanLocations.clear()
+      scanLocations.addAll(prefs.getStringSet("scanLocations", defaultScanLocations))
+      scanLocationsAdapter = new ArrayAdapter(context, android.R.layout.simple_list_item_single_choice, scanLocations)
+      val scanLocationsView = SListView().adapter(scanLocationsAdapter).choiceMode(CHOICE_MODE_SINGLE)
+
       SButton("Remove Selected Scan Location", (view: View) => {
-        //TODO: Implement
+        val editor = prefs.edit()
+        val itemToRemove = scanLocationsAdapter.getItem(scanLocationsView.getCheckedItemPosition)
+        scanLocations.remove(itemToRemove)
+        scanLocationsAdapter.notifyDataSetChanged()
+        editor.putStringSet("scanLocations", new util.HashSet[String](scanLocations))
+        editor.commit()
       })
+
       SButton("Scan and Label", (view: View) => {
         Future {
           alert("Results",
@@ -72,7 +93,7 @@ class VolumeLabel2Symlink extends SActivity {
   }
 
 
-  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent): Unit = {
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     super.onActivityResult(requestCode, resultCode, data);
 
     if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
@@ -80,14 +101,13 @@ class VolumeLabel2Symlink extends SActivity {
       val editor = prefs.edit()
       val selectedDirectory = data.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR)
       if (requestCode == REQUEST_CODE_LINK_LOCATION) {
-        linkLocation.setText(s"Link Location: $selectedDirectory")
         editor.putString("linkLocation", selectedDirectory)
         editor.commit()
-      } else if (requestCode == REQUEST_CODE_SCAN_LOCATION) {
-        val currentScanLocations = prefs.getStringSet("scanLocations", defaultScanLocations)
-        val newScanLocations = (Set(selectedDirectory) ++ currentScanLocations.asScala).asJava
-        scanLocations.adapter(SArrayAdapter(newScanLocations))
-        editor.putStringSet("scanLocations", newScanLocations)
+        linkLocation.setText(s"Link Location: $selectedDirectory")
+      } else if (requestCode == REQUEST_CODE_SCAN_LOCATION && !scanLocations.contains(selectedDirectory)) {
+        scanLocations.add(selectedDirectory)
+        scanLocationsAdapter.notifyDataSetChanged()
+        editor.putStringSet("scanLocations", new util.HashSet[String](scanLocations))
         editor.commit()
       }
     }
