@@ -6,7 +6,7 @@ android.Plugin.androidBuild
 
 name := "volumelabel2symlink"
 
-scalaVersion := "2.11.5"
+scalaVersion := "2.11.6"
 
 proguardCache in Android ++= Seq(
   ProguardCache("org.scaloid") % "org.scaloid"
