@@ -3,7 +3,7 @@ package com.github.oopman
 import java.util
 
 import android.app.ListActivity
-import android.content.Intent
+import android.content.{Context, Intent}
 import android.graphics.Color
 import android.os.AsyncTask
 import android.view.View
@@ -20,14 +20,12 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.collection.mutable.ArrayBuffer
 
 class VolumeLabel2Symlink extends SActivity {
-  implicit val exec = ExecutionContext.fromExecutor(
-    AsyncTask.THREAD_POOL_EXECUTOR)
+//  implicit val exec = ExecutionContext.fromExecutor(
+//    AsyncTask.THREAD_POOL_EXECUTOR)
 
-  val labelledBlockDevicePattern = "LABEL=\"([^\"]+)\"".r.unanchored
-  val blockDevicePattern = "/dev/block/([^:]+)".r.unanchored
+//  val blockDevicePattern = "/dev/block/([^:]+)".r.unanchored
   //    val mountEntryPattern = "/mnt/usb/([\\S]+)".r.unanchored
-  val defaultLinkLocation = "/mnt/usb"
-  val defaultScanLocations = Set("/mnt/usb").asJava
+
   val REQUEST_CODE_SCAN_LOCATION = 0
   val REQUEST_CODE_LINK_LOCATION = 1
 
@@ -36,7 +34,8 @@ class VolumeLabel2Symlink extends SActivity {
   var scanLocationsAdapter: ArrayAdapter[String] = null
 
   onCreate {
-    val prefs = getPreferences(0)
+    val prefs = getSharedPreferences("VolumeLabel2Symlink", Context.MODE_PRIVATE)
+    val editor = prefs.edit()
 
     contentView = new SVerticalLayout {
       style {
@@ -68,7 +67,6 @@ class VolumeLabel2Symlink extends SActivity {
       val scanLocationsView = SListView().adapter(scanLocationsAdapter).choiceMode(CHOICE_MODE_SINGLE)
 
       SButton("Remove Selected Scan Location", (view: View) => {
-        val editor = prefs.edit()
         val itemToRemove = scanLocationsAdapter.getItem(scanLocationsView.getCheckedItemPosition)
         scanLocations.remove(itemToRemove)
         scanLocationsAdapter.notifyDataSetChanged()
@@ -77,17 +75,18 @@ class VolumeLabel2Symlink extends SActivity {
       })
 
       SButton("Scan and Label", (view: View) => {
-        Future {
-          alert("Results",
-            (for (resultLine <- Shell.SU.run("blkid").asScala) yield (resultLine, resultLine) match {
-              case (blockDevicePattern(device), labelledBlockDevicePattern(label)) =>
-                Shell.SU.run(s"""ln -s /mnt/usb/$device /mnt/usb/"$label" """)
-                s"Linked /mnt/usb/$device to /mnt/usb/$label"
-              case _ => ""
-            }) filter {
-              _.length > 0
-            } mkString "\n")
-        }
+        startService(SIntent[MediaActivityIntentService].setAction(MediaActivityIntentService.ACTION_MEDIA_MOUNTED))
+//        Future {
+//          alert("Results",
+//            (for (resultLine <- Shell.SU.run("blkid").asScala) yield (resultLine, resultLine) match {
+//              case (blockDevicePattern(device), labelledBlockDevicePattern(label)) =>
+//                Shell.SU.run(s"""ln -s /mnt/usb/$device /mnt/usb/"$label" """)
+//                s"Linked /mnt/usb/$device to /mnt/usb/$label"
+//              case _ => ""
+//            }) filter {
+//              _.length > 0
+//            } mkString "\n")
+//        }
       })
     } padding 20.dip
   }
@@ -97,8 +96,7 @@ class VolumeLabel2Symlink extends SActivity {
     super.onActivityResult(requestCode, resultCode, data);
 
     if (resultCode == DirectoryChooserActivity.RESULT_CODE_DIR_SELECTED) {
-      val prefs = getPreferences(0)
-      val editor = prefs.edit()
+      val editor = getSharedPreferences("VolumeLabel2Symlink", Context.MODE_PRIVATE).edit()
       val selectedDirectory = data.getStringExtra(DirectoryChooserActivity.RESULT_SELECTED_DIR)
       if (requestCode == REQUEST_CODE_LINK_LOCATION) {
         editor.putString("linkLocation", selectedDirectory)
