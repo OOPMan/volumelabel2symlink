@@ -28,7 +28,8 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
         val prefs = getSharedPreferences("VolumeLabel2Symlink", Context.MODE_PRIVATE)
         val linkLocation = prefs.getString("linkLocation", defaultLinkLocation)
         val scanLocations = prefs.getStringSet("scanLocations", defaultScanLocations).asScala
-        //TODO: Ensure link location exists
+        // TODO: Handle the scenario where linkLocation is on a read-only file-system
+        Shell.SU.run(s"""mkdir -p "$linkLocation" """)
         for (scanLocation <- scanLocations; mountPoint <- mountOutput) {
           val mountEntryPattern = s"^(\\S+)\\s+($scanLocation/\\S+)\\s+".r.unanchored
           mountPoint match {
