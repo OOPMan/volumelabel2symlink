@@ -30,7 +30,7 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
         val scanLocations = prefs.getStringSet("scanLocations", defaultScanLocations).asScala
         //TODO: Ensure link location exists
         for (scanLocation <- scanLocations; mountPoint <- mountOutput) {
-          val mountEntryPattern = s"(\\S+)\\s+($scanLocation\\S*)\\s+".r.unanchored
+          val mountEntryPattern = s"^(\\S+)\\s+($scanLocation/\\S+)\\s+".r.unanchored
           mountPoint match {
             case mountEntryPattern(devicePath, mount) =>
               for (blkidOutputLine <- Shell.SU.run(s"blkid $devicePath").asScala) blkidOutputLine match {
