@@ -35,8 +35,8 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
             case mountEntryPattern(devicePath, mount) =>
               for (blkidOutputLine <- Shell.SU.run(s"blkid $devicePath").asScala) blkidOutputLine match {
                 case blockDeviceLabelPattern(deviceLabel) =>
-                  Shell.SU.run(s"ln -s \"$mount\" \"$linkLocation/$deviceLabel\"")
-                  Application.toast(this, s"Symlinked \"$mount\" as \"$linkLocation/$deviceLabel\"")
+                  Shell.SU.run(s"""ln -s "$mount" "$linkLocation/$deviceLabel" """)
+                  Application.toast(this, s"""Symlinked $mount as $linkLocation/$deviceLabel""")
                 case _ =>
               }
             case _ =>
