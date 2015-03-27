@@ -31,7 +31,9 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
     }
 
     def symlinkLocation(source: String, destination: String) = {
-      Shell.SU.run(s"""ln -s "$source" "$destination" """)
+      Shell.SU.run(List(
+        s"""rm "$destination" """,
+        s"""ln -s "$source" "$destination" """).asJava)
     }
 
     def rebindLocation(source: String, destination: String) = {
@@ -45,11 +47,19 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
     intent.getAction match {
       case MediaActivityIntentService.ACTION_MEDIA_MOUNTED =>
         val prefs = getSharedPreferences("VolumeLabel2Symlink", Context.MODE_PRIVATE)
-        val linkLocation = prefs.getString("linkLocation", defaultLinkLocation)
-        val symlinkLinkLocation = s"""$linkLocation/symlinks"""
-        val mountLinkLocation = s"""$linkLocation/mounts"""
         val scanLocations = prefs.getStringSet("scanLocations", defaultScanLocations).asScala
+        val linkLocation = prefs.getString("linkLocation", defaultLinkLocation)
         val linkMethod = prefs.getInt("linkMethod", 0)
+
+        val symlinkLinkLocation = linkMethod match {
+          case 0 => s"$linkLocation"
+          case _ => s"$linkLocation/symlinks"
+        }
+
+        val mountLinkLocation = linkMethod match {
+          case 1 => s"$linkLocation"
+          case _ => s"$linkLocation/mounts"
+        }
 
         // TODO: Handle the scenario where linkLocation is on a read-only file-system
         createLocation(linkLocation)
@@ -90,6 +100,5 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
       case MediaActivityIntentService.ACTION_MEDIA_UNMOUNTED =>
       case _ =>
     }
-//    Application.toast(this, intent.getAction)
   }
 }
