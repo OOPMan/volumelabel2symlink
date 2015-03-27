@@ -2,29 +2,14 @@ package com.github.oopman
 
 import java.util
 
-import android.app.ListActivity
 import android.content.{Context, Intent}
-import android.graphics.Color
-import android.os.AsyncTask
 import android.view.View
+import android.widget.AbsListView.CHOICE_MODE_SINGLE
 import android.widget._
-import eu.chainfire.libsuperuser.Shell
-import org.scaloid.common._
-import scala.collection.JavaConverters._
 import net.rdrei.android.dirchooser.DirectoryChooserActivity
-
-import android.widget.AbsListView.{CHOICE_MODE_SINGLE, CHOICE_MODE_MULTIPLE}
-
-import scala.concurrent.{ExecutionContext, Future}
-
-import scala.collection.mutable.ArrayBuffer
+import org.scaloid.common._
 
 class VolumeLabel2Symlink extends SActivity {
-//  implicit val exec = ExecutionContext.fromExecutor(
-//    AsyncTask.THREAD_POOL_EXECUTOR)
-
-//  val blockDevicePattern = "/dev/block/([^:]+)".r.unanchored
-  //    val mountEntryPattern = "/mnt/usb/([\\S]+)".r.unanchored
 
   val REQUEST_CODE_SCAN_LOCATION = 0
   val REQUEST_CODE_LINK_LOCATION = 1
@@ -76,17 +61,6 @@ class VolumeLabel2Symlink extends SActivity {
 
       SButton("Scan and Label", (view: View) => {
         startService(SIntent[MediaActivityIntentService].setAction(MediaActivityIntentService.ACTION_MEDIA_MOUNTED))
-//        Future {
-//          alert("Results",
-//            (for (resultLine <- Shell.SU.run("blkid").asScala) yield (resultLine, resultLine) match {
-//              case (blockDevicePattern(device), labelledBlockDevicePattern(label)) =>
-//                Shell.SU.run(s"""ln -s /mnt/usb/$device /mnt/usb/"$label" """)
-//                s"Linked /mnt/usb/$device to /mnt/usb/$label"
-//              case _ => ""
-//            }) filter {
-//              _.length > 0
-//            } mkString "\n")
-//        }
       })
     } padding 20.dip
   }
