@@ -3,7 +3,7 @@ package com.github.oopman
 import java.util
 
 import android.content.{Context, Intent}
-import android.view.View
+import android.view.{ViewParent, View}
 import android.widget.AbsListView.CHOICE_MODE_SINGLE
 import android.widget._
 import net.rdrei.android.dirchooser.DirectoryChooserActivity
@@ -29,6 +29,12 @@ class VolumeLabel2Symlink extends SActivity {
       }
 
       STextView("VolumeLabel2Symlink")
+
+      SSpinner().adapter(SArrayAdapter(linkMethodsLabels)).selection(prefs.getInt("linkMethod", 0)).onItemSelected(
+        (parent: ViewParent , view: View, position: Int, id: Int) => {
+          editor.putInt("linkMethod", position)
+          editor.commit()
+      });
 
       SButton("Set Link Location", (view: View) => {
         startActivityForResult(
