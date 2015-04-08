@@ -40,7 +40,8 @@ class VolumeLabel2Symlink extends SActivity {
         startActivityForResult(
           SIntent[DirectoryChooserActivity]
             .putExtra(DirectoryChooserActivity.EXTRA_INITIAL_DIRECTORY, "/")
-            .putExtra(DirectoryChooserActivity.EXTRA_NEW_DIR_NAME, "links"),
+            .putExtra(DirectoryChooserActivity.EXTRA_NEW_DIR_NAME, "links")
+            .putExtra(DirectoryChooserActivity.EXTRA_ALLOW_READ_ONLY_DIRECTORY, true),
           REQUEST_CODE_LINK_LOCATION)
       })
       linkLocation = STextView("Link location: " + prefs.getString("linkLocation", defaultLinkLocation))
@@ -49,7 +50,8 @@ class VolumeLabel2Symlink extends SActivity {
         startActivityForResult(
           SIntent[DirectoryChooserActivity]
             .putExtra(DirectoryChooserActivity.EXTRA_INITIAL_DIRECTORY, "/")
-            .putExtra(DirectoryChooserActivity.EXTRA_NEW_DIR_NAME, "links"),
+            .putExtra(DirectoryChooserActivity.EXTRA_NEW_DIR_NAME, "links")
+            .putExtra(DirectoryChooserActivity.EXTRA_ALLOW_READ_ONLY_DIRECTORY, true),
           REQUEST_CODE_SCAN_LOCATION)
       })
       scanLocations.clear()
