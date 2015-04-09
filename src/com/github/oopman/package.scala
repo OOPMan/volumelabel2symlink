@@ -4,7 +4,8 @@ import scala.collection.JavaConverters._
 
 package object oopman {
   val blockDeviceLabelPattern = "LABEL=\"([^\"]+)\"".r.unanchored
-  val defaultLinkLocation = "/mnt/usb/links"
+  val defaultLinkLocation = "/mnt/usb"
+  val defaultLinkFolderName = "links"
   val defaultScanLocations = Set("/mnt/usb").asJava
   val linkMethods = Map(
     0 -> "Symlink Mount",

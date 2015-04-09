@@ -49,16 +49,17 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
         val prefs = getSharedPreferences("VolumeLabel2Symlink", Context.MODE_PRIVATE)
         val scanLocations = prefs.getStringSet("scanLocations", defaultScanLocations).asScala
         val linkLocation = prefs.getString("linkLocation", defaultLinkLocation)
+        val linkFolderName = prefs.getString("linkFolderName", defaultLinkFolderName)
         val linkMethod = prefs.getInt("linkMethod", 0)
 
         val symlinkLinkLocation = linkMethod match {
-          case 0 => s"$linkLocation"
-          case _ => s"$linkLocation/symlinks"
+          case 0 => s"$linkLocation/$linkFolderName"
+          case _ => s"$linkLocation/$linkFolderName/symlinks"
         }
 
         val mountLinkLocation = linkMethod match {
-          case 1 => s"$linkLocation"
-          case _ => s"$linkLocation/mounts"
+          case 1 => s"$linkLocation/$linkFolderName"
+          case _ => s"$linkLocation/$linkFolderName/mounts"
         }
 
         // TODO: Handle the scenario where linkLocation is on a read-only file-system

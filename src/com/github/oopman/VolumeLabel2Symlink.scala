@@ -46,6 +46,12 @@ class VolumeLabel2Symlink extends SActivity {
       })
       linkLocation = STextView("Link location: " + prefs.getString("linkLocation", defaultLinkLocation))
 
+      STextView("Link folder name")
+      SEditText(prefs.getString("linkFolderName", defaultLinkFolderName)).onTextChanged( (text: CharSequence, start: Int, lengthBefore: Int, lengthAfter: Int) => {
+        editor.putString("linkFolderName", text.toString)
+        editor.commit()
+      })
+
       SButton("Add Scan Location", (view: View) => {
         startActivityForResult(
           SIntent[DirectoryChooserActivity]
