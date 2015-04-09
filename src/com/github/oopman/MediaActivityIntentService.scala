@@ -75,7 +75,7 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
         }
 
         for (scanLocation <- scanLocations; mountPoint <- mountOutput) {
-          val mountEntryPattern = s"^(\\S+)\\s+($scanLocation/\\S+)\\s+".r.unanchored
+          val mountEntryPattern = s"^(/dev/block/\\S+)\\s+($scanLocation/\\S+)\\s+".r.unanchored
           mountPoint match {
             case mountEntryPattern(devicePath, mount) =>
               for (blkidOutputLine <- Shell.SU.run(s"blkid $devicePath").asScala) blkidOutputLine match {
