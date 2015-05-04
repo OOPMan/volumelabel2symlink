@@ -18,6 +18,8 @@ proguardOptions in Android ++= Seq("-dontobfuscate", "-dontoptimize", "-keepattr
 
 libraryDependencies ++= Seq(
   "org.scaloid" %% "scaloid" % "3.6.1-10" withSources() withJavadoc(),
+  aar("com.snappydb" % "snappydb-lib" % "0.5.0") withSources() withJavadoc(),
+  "com.esotericsoftware.kryo" % "kryo" % "2.24.0" withSources() withJavadoc(),
   "com.gu" % "option" % "1.3",
   "com.android.support" % "support-annotations" % "21.0.3",
   aar("eu.chainfire" % "libsuperuser" % "1.0.0.201503122108") withSources() withJavadoc()/*,
