@@ -3,6 +3,7 @@ package com.github.oopman
 import android.app.IntentService
 import android.content.{Context, Intent}
 import android.os.Bundle
+import com.snappydb.DBFactory
 import eu.chainfire.libsuperuser.{Shell, Application}
 import org.scaloid.common.{SContext, SIntent}
 import scala.collection.JavaConverters._
@@ -22,6 +23,7 @@ object MediaActivityIntentService {
 
 class MediaActivityIntentService extends IntentService("MediaActivityIntentService") with SContext {
   override def onHandleIntent(intent: Intent) = {
+    val db = DBFactory.open(this)
 
     def createLocation(location: String) = {
       Shell.SU.run(List(
@@ -31,16 +33,22 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
     }
 
     def symlinkLocation(source: String, destination: String) = {
-      Shell.SU.run(List(
-        s"""rm "$destination" """,
-        s"""ln -s "$source" "$destination" """).asJava)
+      if (!db.exists(s"vl2s:$destination") || db.get(s"vl2s:$destination") != source) {
+        Shell.SU.run(List(
+          s"""rm "$destination" """,
+          s"""ln -s "$source" "$destination" """).asJava)
+        Application.toast(this, s"Symlinked $source to $destination")
+      }
     }
 
     def rebindLocation(source: String, destination: String) = {
-      Shell.SU.run(List(
-        s"""mkdir -p "$destination" """,
-        s"""chmod 777 "$destination" """,
-        s"""busybox mount --rbind "$source" "$destination" """).asJava)
+      if (!db.exists(s"vl2s:$destination") || db.get(s"vl2s:$destination") != source) {
+        Shell.SU.run(List(
+          s"""mkdir -p "$destination" """,
+          s"""chmod 777 "$destination" """,
+          s"""busybox mount --rbind "$source" "$destination" """).asJava)
+        Application.toast(this, s"""Rebound $source as $destination""")
+      }
     }
 
     val mountOutput = Shell.SU.run("mount").asScala
@@ -83,14 +91,11 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
                   linkMethod match {
                     case 0 =>
                       symlinkLocation(mount, s"$symlinkLinkLocation/$deviceLabel")
-                      Application.toast(this, s"Symlinked $mount to $symlinkLinkLocation/$deviceLabel")
                     case 1 =>
                       rebindLocation(mount, s"$mountLinkLocation/$deviceLabel")
-                      Application.toast(this, s"""Rebound $mount as $mountLinkLocation/$deviceLabel""")
                     case 2 =>
                       symlinkLocation(mount, s"$symlinkLinkLocation/$deviceLabel")
                       rebindLocation(mount, s"$mountLinkLocation/$deviceLabel")
-                      Application.toast(this, s"Symlinked $mount to $symlinkLinkLocation/$deviceLabel and rebound $mount as $mountLinkLocation/$deviceLabel")
                   }
                 case _ =>
               }
