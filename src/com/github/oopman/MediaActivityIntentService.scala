@@ -38,6 +38,7 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
           s"""rm "$destination" """,
           s"""ln -s "$source" "$destination" """).asJava)
         Application.toast(this, s"Symlinked $source to $destination")
+        db.put(s"vl2s:$destination", source)
       }
     }
 
@@ -48,6 +49,7 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
           s"""chmod 777 "$destination" """,
           s"""busybox mount --rbind "$source" "$destination" """).asJava)
         Application.toast(this, s"""Rebound $source as $destination""")
+        db.put(s"vl2s:$destination", source)
       }
     }
 
