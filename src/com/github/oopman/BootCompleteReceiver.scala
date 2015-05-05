@@ -15,6 +15,7 @@ class BootCompleteReceiver extends BroadcastReceiver {
     for (key <- db.findKeys("vl2s")) {
       db.del(key)
     }
+    db.close()
     Log.d(TAG, "exited onReceive")
   }
 }

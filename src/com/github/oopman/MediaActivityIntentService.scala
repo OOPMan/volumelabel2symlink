@@ -108,5 +108,7 @@ class MediaActivityIntentService extends IntentService("MediaActivityIntentServi
       case MediaActivityIntentService.ACTION_MEDIA_UNMOUNTED =>
       case _ =>
     }
+
+    db.close()
   }
 }
